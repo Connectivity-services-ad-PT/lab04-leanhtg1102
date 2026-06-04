@@ -107,7 +107,6 @@ def build_problem(
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
-    # Đã sửa lỗi không tìm thấy HTTP_STATUS_CODES ở đây
     if isinstance(exc.detail, dict):
         problem = exc.detail
     else:
@@ -186,6 +185,12 @@ def now_iso() -> str:
 def next_reading_id() -> str:
     today = datetime.now(timezone.utc).strftime("%Y%m%d")
     return f"R-{today}-{len(READINGS) + 1:04d}"
+
+
+# Thêm endpoint HEAD này để vượt qua bước check "wait-on" của GitHub Actions
+@app.head("/health")
+def health_head() -> Response:
+    return Response(status_code=status.HTTP_200_OK)
 
 
 @app.get("/health", response_model=HealthResponse)
